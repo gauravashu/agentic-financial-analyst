@@ -10,32 +10,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import Login from "./components/Login";
-
 const API_URL =
   import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 function App() {
-  // =========================================================
-  // AUTHENTICATION
-  // =========================================================
-
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-
-    if (!savedUser) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(savedUser);
-    } catch {
-      localStorage.removeItem("user");
-      localStorage.removeItem("access_token");
-      return null;
-    }
-  });
-
   // =========================================================
   // FINANCIAL ANALYST STATE
   // =========================================================
@@ -74,21 +52,6 @@ function App() {
   const [marketError, setMarketError] = useState("");
 
   // =========================================================
-  // AUTH HANDLERS
-  // =========================================================
-
-  function handleLogin(loggedInUser) {
-    setUser(loggedInUser);
-  }
-
-  function handleLogout() {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user");
-
-    setUser(null);
-  }
-
-  // =========================================================
   // MARKET DATA API
   // =========================================================
 
@@ -105,9 +68,7 @@ function App() {
       );
 
       if (!response.ok) {
-        throw new Error(
-          `Market API error: ${response.status}`
-        );
+        throw new Error(`Market API error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -118,7 +79,7 @@ function App() {
       console.error("Market data error:", error);
 
       setMarketError(
-        "Unable to load market data. Make sure FastAPI is running on port 8000."
+        "Unable to load market data. Check the backend connection."
       );
 
       setMarketData([]);
@@ -133,10 +94,8 @@ function App() {
   // =========================================================
 
   useEffect(() => {
-    if (user) {
-      fetchMarketData(selectedStock, selectedPeriod);
-    }
-  }, [user, selectedStock, selectedPeriod]);
+    fetchMarketData(selectedStock, selectedPeriod);
+  }, [selectedStock, selectedPeriod]);
 
   // =========================================================
   // QUICK QUERIES
@@ -196,70 +155,44 @@ function App() {
     ]);
 
     try {
-      const token = localStorage.getItem("access_token");
-
       const response = await fetch(`${API_URL}/analyze`, {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
-
-          ...(token && {
-            Authorization: `Bearer ${token}`,
-          }),
         },
-
         body: JSON.stringify({
           query: finalQuery,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(
-          `Server error: ${response.status}`
-        );
+        throw new Error(`Server error: ${response.status}`);
       }
 
       const data = await response.json();
 
-      setAnswer(
-        data.answer || "No answer returned."
-      );
-
-      setTool(
-        data.tool || "Direct AI"
-      );
-
-      setToolStatus(
-        data.tool_status || "Completed"
-      );
+      setAnswer(data.answer || "No answer returned.");
+      setTool(data.tool || "Direct AI");
+      setToolStatus(data.tool_status || "Completed");
 
       const toolName = data.tool || "";
 
       let toolTitle = "Direct AI Response";
-
       let toolDescription =
         "Qwen3 generated the response directly.";
 
       if (toolName.includes("calculate")) {
         toolTitle = "MCP Calculator";
-
         toolDescription =
           "Mathematical calculation executed through MCP.";
-      } else if (
-        toolName.includes("get_stock_price")
-      ) {
+      } else if (toolName.includes("get_stock_price")) {
         toolTitle = "MCP Stock Data";
-
         toolDescription =
           "Latest available market price retrieved.";
       } else if (
-        toolName.includes(
-          "search_financial_reports"
-        )
+        toolName.includes("search_financial_reports")
       ) {
         toolTitle = "Financial RAG";
-
         toolDescription =
           "Relevant financial report information retrieved using vector search.";
       }
@@ -273,8 +206,7 @@ function App() {
         },
         {
           title: "Qwen3 Agent",
-          description:
-            "Query analyzed successfully",
+          description: "Query analyzed successfully",
           status: "Completed",
           type: "agent",
         },
@@ -296,7 +228,7 @@ function App() {
       console.error(err);
 
       setError(
-        "Unable to connect to the backend. Make sure FastAPI is running on port 8000."
+        "Unable to connect to the backend. Make sure the FastAPI backend is running."
       );
 
       setActivities([
@@ -326,36 +258,15 @@ function App() {
       return "Calculator";
     }
 
-    if (
-      tool.includes("get_stock_price")
-    ) {
+    if (tool.includes("get_stock_price")) {
       return "Stock Data";
     }
 
-    if (
-      tool.includes(
-        "search_financial_reports"
-      )
-    ) {
+    if (tool.includes("search_financial_reports")) {
       return "Financial RAG";
     }
 
     return "AI Agent";
-  }
-
-  // =========================================================
-  // USER INITIAL
-  // =========================================================
-
-  const userInitial =
-    user?.name?.charAt(0)?.toUpperCase() || "A";
-
-  // =========================================================
-  // SHOW LOGIN
-  // =========================================================
-
-  if (!user) {
-    return <Login onLogin={handleLogin} />;
   }
 
   // =========================================================
@@ -368,7 +279,7 @@ function App() {
       : null;
 
   const currentClose =
-    marketInfo?.close || null;
+    marketInfo?.close ?? null;
 
   const priceChange =
     currentClose !== null &&
@@ -392,16 +303,12 @@ function App() {
     switch (selectedPeriod) {
       case "1mo":
         return "1 Month";
-
       case "3mo":
         return "3 Months";
-
       case "6mo":
         return "6 Months";
-
       case "1y":
         return "1 Year";
-
       default:
         return selectedPeriod;
     }
@@ -413,7 +320,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#050816] text-white">
-
       <div className="flex min-h-screen">
 
         {/* =====================================================
@@ -429,7 +335,6 @@ function App() {
             </div>
 
             <div>
-
               <div className="text-sm font-bold tracking-wide">
                 FINANCE AI
               </div>
@@ -437,7 +342,6 @@ function App() {
               <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
                 Intelligence
               </div>
-
             </div>
 
           </div>
@@ -501,7 +405,7 @@ function App() {
                 <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
 
                 <span className="text-xs font-medium text-emerald-300">
-                  All systems operational
+                  AI system ready
                 </span>
 
               </div>
@@ -509,7 +413,7 @@ function App() {
               <div className="text-[11px] leading-5 text-slate-500">
                 Qwen3 · MCP · RAG
                 <br />
-                FastAPI backend connected
+                FastAPI backend
               </div>
 
             </div>
@@ -557,43 +461,8 @@ function App() {
                 🔔
               </button>
 
-              {/* USER */}
-
-              <div className="group relative">
-
-                <button
-                  type="button"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-bold"
-                >
-                  {userInitial}
-                </button>
-
-                <div className="invisible absolute right-0 top-12 z-50 w-56 rounded-2xl border border-white/10 bg-[#0b1020] p-4 opacity-0 shadow-2xl transition group-hover:visible group-hover:opacity-100">
-
-                  <div className="mb-3">
-
-                    <div className="text-sm font-semibold text-white">
-                      {user.name}
-                    </div>
-
-                    <div className="mt-1 truncate text-xs text-slate-500">
-                      {user.email}
-                    </div>
-
-                  </div>
-
-                  <div className="mb-3 h-px bg-white/10" />
-
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="w-full rounded-xl border border-red-500/20 bg-red-500/5 px-3 py-2 text-left text-xs text-red-400 transition hover:bg-red-500/10"
-                  >
-                    🚪 Sign Out
-                  </button>
-
-                </div>
-
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-bold">
+                AI
               </div>
 
             </div>
@@ -763,8 +632,8 @@ function App() {
 
               <MetricCard
                 label="Backend"
-                value="Healthy"
-                sub="FastAPI · Port 8000"
+                value="Connected"
+                sub="FastAPI API"
                 icon="●"
                 positive
               />
@@ -777,13 +646,9 @@ function App() {
 
             <section className="grid gap-5 xl:grid-cols-[1.65fr_1fr]">
 
-              {/* =================================================
-                  REAL MARKET VISUALIZATION
-              ================================================== */}
+              {/* MARKET */}
 
               <div className="rounded-3xl border border-white/10 bg-[#080d1b] p-5 md:p-6">
-
-                {/* MARKET HEADER */}
 
                 <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
 
@@ -803,8 +668,6 @@ function App() {
 
                   </div>
 
-                  {/* SELECTORS */}
-
                   <div className="flex flex-wrap gap-2">
 
                     <select
@@ -814,19 +677,9 @@ function App() {
                       }
                       className="rounded-xl border border-white/10 bg-[#0d1428] px-3 py-2 text-xs text-slate-200 outline-none transition focus:border-blue-400/40"
                     >
-
-                      <option value="AAPL">
-                        AAPL
-                      </option>
-
-                      <option value="MSFT">
-                        MSFT
-                      </option>
-
-                      <option value="TSLA">
-                        TSLA
-                      </option>
-
+                      <option value="AAPL">AAPL</option>
+                      <option value="MSFT">MSFT</option>
+                      <option value="TSLA">TSLA</option>
                     </select>
 
                     <select
@@ -836,30 +689,17 @@ function App() {
                       }
                       className="rounded-xl border border-white/10 bg-[#0d1428] px-3 py-2 text-xs text-slate-200 outline-none transition focus:border-blue-400/40"
                     >
-
-                      <option value="1mo">
-                        1 Month
-                      </option>
-
-                      <option value="3mo">
-                        3 Months
-                      </option>
-
-                      <option value="6mo">
-                        6 Months
-                      </option>
-
-                      <option value="1y">
-                        1 Year
-                      </option>
-
+                      <option value="1mo">1 Month</option>
+                      <option value="3mo">3 Months</option>
+                      <option value="6mo">6 Months</option>
+                      <option value="1y">1 Year</option>
                     </select>
 
                   </div>
 
                 </div>
 
-                {/* PRICE SUMMARY */}
+                {/* PRICE */}
 
                 <div className="mb-5 flex flex-wrap items-end gap-6">
 
@@ -895,31 +735,19 @@ function App() {
                             : "text-red-400"
                         }`}
                       >
-
-                        {isPriceUp
-                          ? "▲"
-                          : "▼"}
-
-                        {" "}
-
-                        {Math.abs(priceChange).toFixed(2)}
-
-                        {" "}
-
+                        {isPriceUp ? "▲" : "▼"}{" "}
+                        {Math.abs(priceChange).toFixed(2)}{" "}
                         {priceChangePercent !== null &&
                           `(${Math.abs(
                             priceChangePercent
                           ).toFixed(2)}%)`}
-
                       </div>
 
                     </div>
                   )}
 
                   <div className="ml-auto rounded-lg border border-emerald-400/20 bg-emerald-400/5 px-3 py-1.5 text-xs text-emerald-300">
-
                     ● Market Data
-
                   </div>
 
                 </div>
@@ -1080,9 +908,7 @@ function App() {
                           stroke="#60a5fa"
                           strokeWidth={3}
                           dot={false}
-                          activeDot={{
-                            r: 5,
-                          }}
+                          activeDot={{ r: 5 }}
                         />
 
                       </LineChart>
@@ -1116,9 +942,7 @@ function App() {
 
               </div>
 
-              {/* =================================================
-                  AI RESULT
-              ================================================== */}
+              {/* AI RESULT */}
 
               <div className="flex flex-col rounded-3xl border border-white/10 bg-[#080d1b] p-5 md:p-6">
 
@@ -1267,7 +1091,7 @@ function App() {
 
             <section className="grid gap-5 xl:grid-cols-[1.15fr_1fr]">
 
-              {/* AGENT ACTIVITY */}
+              {/* ACTIVITY */}
 
               <div className="rounded-3xl border border-white/10 bg-[#080d1b] p-5 md:p-6">
 
@@ -1442,7 +1266,6 @@ function App() {
         </main>
 
       </div>
-
     </div>
   );
 }
@@ -1465,7 +1288,6 @@ function SidebarItem({
           : "text-slate-500 hover:bg-white/[0.03] hover:text-slate-200"
       }`}
     >
-
       <span className="flex w-5 justify-center text-base">
         {icon}
       </span>
@@ -1475,7 +1297,6 @@ function SidebarItem({
       {active && (
         <span className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-400" />
       )}
-
     </div>
   );
 }
@@ -1580,13 +1401,11 @@ function ActivityItem({
             : "border-emerald-400/20 bg-emerald-400/10 text-emerald-400"
         }`}
       >
-
         {failed
           ? "!"
           : processing
           ? "…"
           : "✓"}
-
       </div>
 
       <div className="min-w-0 flex-1 pb-4">
