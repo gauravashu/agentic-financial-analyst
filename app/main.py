@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from app.routes_market import router as market_router
 
 from app.agents.financial_agent import ask_financial_agent
-from app.auth.routes import router as auth_router
 
 
 # =========================================================
@@ -16,7 +15,6 @@ app = FastAPI(
     description="AI-powered financial analysis platform",
     version="1.0.0",
 )
-app.include_router(market_router)
 
 
 # =========================================================
@@ -35,11 +33,6 @@ app.add_middleware(
 )
 
 
-# =========================================================
-# AUTH ROUTES
-# =========================================================
-
-app.include_router(auth_router)
 
 
 # =========================================================
