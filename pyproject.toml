@@ -1,0 +1,40 @@
+[project]
+name = "agentic-financial-analyst"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "gauravashu", email = "ashish.gaurav64@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "email-validator>=2.3.0",
+    "faiss-cpu>=1.15.0",
+    "fastapi>=0.141.1",
+    "grandalf>=0.8",
+    "httpx>=0.28.1",
+    "langchain>=1.4.0",
+    "langchain-community>=0.4.2",
+    "langchain-mcp-adapters>=0.3.1",
+    "langchain-ollama>=1.1.0",
+    "langchain-openai>=1.6.2",
+    "langchain-text-splitters>=1.1.2",
+    "langgraph>=1.2.11",
+    "mcp[cli]<2",
+    "psycopg2-binary>=2.9.13",
+    "pwdlib[argon2]>=0.3.1",
+    "pydantic-settings>=2.15.0",
+    "python-dotenv>=1.2.3",
+    "python-jose>=3.5.0",
+    "sentence-transformers>=6.0.1",
+    "sqlalchemy>=2.0.54",
+    "uvicorn>=0.53.0",
+    "yfinance>=1.7.0",
+]
+
+[project.scripts]
+agentic-financial-analyst = "agentic_financial_analyst:main"
+
+[build-system]
+requires = ["uv_build>=0.12.14,<0.13.0"]
+build-backend = "uv_build"
